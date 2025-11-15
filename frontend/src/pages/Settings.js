@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { User, Shield, Bell, Download, Trash2 } from 'lucide-react';
@@ -6,30 +6,148 @@ import { Button } from '../components/ui/button';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import { Separator } from '../components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import PasskeyDialog from '../components/PasskeyDialog';
+import apiClient, { getApiUrl } from '../services/api';
+import { passwordService } from '../services/passwordService';
+import { decryptData } from '../utils/encryption';
 
 export default function Settings() {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, getAuthHeaders, encryptionKey } = useAuth();
   const [settings, setSettings] = useState({
-    passkeyEnabled: false,
+    passwordEnabled: false,
     autoLock: true,
+    exportFormat: 'json',
     loginNotifications: true,
     clipboardAutoClear: true
   });
+  const [showPasskeyDialog, setShowPasskeyDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleToggle = (key) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
-    toast.success('Setting updated');
+  useEffect(() => {
+    // Load settings from currentUser
+    if (currentUser) {
+      setSettings(prev => ({
+        ...prev,
+        passwordEnabled: currentUser.passwordEnabled || false,
+        autoLock: currentUser.preferences?.autoLock !== false,
+        loginNotifications: currentUser.preferences?.loginNotifications !== false,
+        clipboardAutoClear: currentUser.preferences?.clipboardAutoClear !== false
+      }));
+    }
+  }, [currentUser]);
+
+  const handleToggle = async (key) => {
+    if (key === 'passwordEnabled') {
+      // If enabling passkey, show dialog
+      if (!settings.passwordEnabled) {
+        setShowPasskeyDialog(true);
+      } else {
+        // If disabling, show confirmation
+        if (window.confirm('Are you sure you want to disable your passkey? This will prevent you from downloading passwords.')) {
+          // Note: Backend doesn't have a disable endpoint yet, so we'll just show a message
+          toast.info('To disable passkey, please contact support or use the account deletion feature');
+        }
+      }
+    } else {
+      // For other settings, just update local state
+      setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+      toast.success('Setting updated');
+    }
   };
 
-  const handleExportVault = () => {
-    toast.info('Export feature coming soon');
+  const handlePasskeySet = () => {
+    setSettings(prev => ({ ...prev, passwordEnabled: true }));
+    setShowPasskeyDialog(false);
   };
 
-  const handleDeleteAccount = () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      toast.error('Account deletion feature coming soon');
+  const handleExportVault = async (format = 'json') => {
+    if (!currentUser?.passwordEnabled) {
+      toast.error('Please enable passkey first to download passwords');
+      return;
+    }
+
+    try {
+      if (!encryptionKey) {
+        toast.error('Encryption key not available');
+        return;
+      }
+
+      toast.loading(`Preparing ${format.toUpperCase()} download...`, { id: 'export' });
+      const headers = await getAuthHeaders();
+      const exportData = await passwordService.exportPasswords(headers);
+      
+      // Decrypt passwords
+      const decryptedPasswords = await Promise.all(
+        exportData.passwords.map(async (pwd) => {
+          try {
+            const decryptedPassword = pwd.encryptedPassword 
+              ? await decryptData(pwd.encryptedPassword, encryptionKey)
+              : '';
+            const decryptedNotes = pwd.encryptedNotes 
+              ? await decryptData(pwd.encryptedNotes, encryptionKey)
+              : '';
+            
+            return {
+              ...pwd,
+              password: decryptedPassword,
+              notes: decryptedNotes,
+              encryptedPassword: undefined,
+              encryptedNotes: undefined
+            };
+          } catch (error) {
+            console.error('Failed to decrypt password:', error);
+            return {
+              ...pwd,
+              password: '[Decryption Failed]',
+              notes: pwd.encryptedNotes ? '[Decryption Failed]' : '',
+              encryptedPassword: undefined,
+              encryptedNotes: undefined
+            };
+          }
+        })
+      );
+
+      // Use export utility
+      const { exportPasswords: exportUtil } = await import('../utils/passwordExport');
+      exportUtil(decryptedPasswords, exportData, format);
+
+      toast.success(`Passwords downloaded as ${format.toUpperCase()} successfully`, { id: 'export' });
+    } catch (error) {
+      console.error('Failed to export passwords:', error);
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to export passwords';
+      toast.error(errorMessage, { id: 'export' });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you sure you want to delete your account? Your data will be retained for 30 days, but you will not be able to access it. This action cannot be undone.')) {
+      return;
+    }
+
+    // Second confirmation
+    if (!window.confirm('This is your last chance. Are you absolutely sure you want to delete your account?')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const headers = await getAuthHeaders();
+      await apiClient.delete(getApiUrl('/api/users/me'), { headers });
+      
+      toast.success('Account deleted successfully');
+      // Logout user after deletion
+      setTimeout(() => {
+        logout();
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to delete account';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,13 +207,14 @@ export default function Settings() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-base">Enable Passkey (WebAuthn)</Label>
-                <p className="text-sm text-gray-600">Use biometric authentication</p>
+                <Label className="text-base">Enable Passkey</Label>
+                <p className="text-sm text-gray-600">Set a passkey to protect your vault and enable password downloads</p>
               </div>
               <Switch
-                checked={settings.passkeyEnabled}
-                onCheckedChange={() => handleToggle('passkeyEnabled')}
-                data-testid="passkey-toggle"
+                checked={settings.passwordEnabled}
+                onCheckedChange={() => handleToggle('passwordEnabled')}
+                data-testid="password-toggle"
+                disabled={loading}
               />
             </div>
 
@@ -171,15 +290,41 @@ export default function Settings() {
           </div>
 
           <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select
+                defaultValue="json"
+                onValueChange={(value) => {
+                  // Store selected format for export
+                  setSettings(prev => ({ ...prev, exportFormat: value }));
+                }}
+              >
+                <SelectTrigger className="w-full" data-testid="export-format-select">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="pdf">PDF (Text)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button
-              onClick={handleExportVault}
+              onClick={() => handleExportVault(settings.exportFormat || 'json')}
               variant="outline"
               className="w-full justify-start"
               data-testid="export-vault-btn"
+              disabled={!currentUser?.passwordEnabled}
+              title={!currentUser?.passwordEnabled ? 'Enable passkey to download passwords' : ''}
             >
               <Download className="w-4 h-4 mr-2" />
-              Export Encrypted Vault
+              Download Passwords ({settings.exportFormat?.toUpperCase() || 'JSON'})
             </Button>
+            {!currentUser?.passwordEnabled && (
+              <p className="text-sm text-gray-500 italic">
+                Enable passkey in Security settings to download your passwords
+              </p>
+            )}
           </div>
         </motion.div>
 
@@ -213,6 +358,19 @@ export default function Settings() {
           </div>
         </motion.div>
       </div>
+
+      {/* Passkey Dialog */}
+      <PasskeyDialog
+        open={showPasskeyDialog}
+        onOpenChange={(open) => {
+          setShowPasskeyDialog(open);
+          if (!open) {
+            // If dialog is closed without setting passkey, reset toggle
+            setSettings(prev => ({ ...prev, passwordEnabled: false }));
+          }
+        }}
+        required={false}
+      />
     </Layout>
   );
 }

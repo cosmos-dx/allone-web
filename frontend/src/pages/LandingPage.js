@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Lock, Smartphone, Brain, Users, Zap, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 
 export default function LandingPage() {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, currentUser } = useAuth();
+  const navigate = useNavigate();
   const [typewriterText, setTypewriterText] = useState('');
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   
@@ -15,6 +17,13 @@ export default function LandingPage() {
     'One Password. All Accounts.',
     'Protected by AI'
   ];
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/dashboard');
+    }
+  }, [currentUser, navigate]);
 
   useEffect(() => {
     let timeout;
@@ -38,6 +47,7 @@ export default function LandingPage() {
     try {
       await loginWithGoogle();
       toast.success('Welcome to AllOne!');
+      // Navigation will happen automatically via useEffect when currentUser is set
     } catch (error) {
       toast.error('Failed to sign in. Please try again.');
     }
@@ -73,11 +83,11 @@ export default function LandingPage() {
         {/* Navigation */}
         <nav className="absolute top-0 left-0 right-0 z-50 px-6 py-6">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="logo-lockup">
+            <div className="logo-lockup flex items-center gap-2">
               <img 
-                src="https://customer-assets.emergentagent.com/job_b2b6fbf0-c50c-4972-b29b-b2e5d9c1eec1/artifacts/snhi19yn_Alloneicon.png" 
+                src="/Alloneicon.svg" 
                 alt="AllOne" 
-                className="w-10 h-10"
+                className="w-10 h-10 object-contain"
               />
               <h1 className="text-2xl font-bold gradient-text">AllOne</h1>
             </div>
@@ -104,8 +114,8 @@ export default function LandingPage() {
                 <span className="animate-pulse">|</span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-2xl">
-                AllOne is your all-in-one password manager with TOTP authenticator, 
-                AI-powered security, and seamless family sharing. Keep your digital life secure.
+                Your Centralized Digital Vault - Secure passwords, TOTP codes, bills, and more. 
+                All in one place with AI-powered security and seamless sharing.
               </p>
               <Button 
                 onClick={handleGoogleSignIn}
@@ -127,9 +137,9 @@ export default function LandingPage() {
               <div className="glass rounded-3xl p-8 shadow-2xl">
                 <div className="flex items-center justify-center mb-6">
                   <img 
-                    src="https://customer-assets.emergentagent.com/job_b2b6fbf0-c50c-4972-b29b-b2e5d9c1eec1/artifacts/snhi19yn_Alloneicon.png" 
-                    alt="AllOne Icon" 
-                    className="w-32 h-32"
+                    src="/Allonelogo.jpg" 
+                    alt="AllOne Logo" 
+                    className="w-32 h-32 object-contain"
                   />
                 </div>
                 <div className="space-y-4">

@@ -5,10 +5,11 @@ function base32Decode(base32) {
   let bits = '';
   let hex = '';
 
-  base32 = base32.replace(/=+$/, '').toUpperCase();
+  // Create a new variable instead of reassigning the parameter
+  const normalizedBase32 = base32.replace(/=+$/, '').toUpperCase();
 
-  for (let i = 0; i < base32.length; i++) {
-    const val = base32Chars.indexOf(base32.charAt(i));
+  for (let i = 0; i < normalizedBase32.length; i++) {
+    const val = base32Chars.indexOf(normalizedBase32.charAt(i));
     if (val === -1) throw new Error('Invalid base32 character');
     bits += val.toString(2).padStart(5, '0');
   }
@@ -29,11 +30,16 @@ function hexToBytes(hex) {
   return new Uint8Array(bytes);
 }
 
-async function hmacSha1(key, message) {
+async function hmac(key, message, algorithm = 'SHA-1') {
+  // Map algorithm names to Web Crypto API format
+  const hashAlgo = algorithm.toUpperCase() === 'SHA1' ? 'SHA-1' : 
+                   algorithm.toUpperCase() === 'SHA256' ? 'SHA-256' :
+                   algorithm.toUpperCase() === 'SHA512' ? 'SHA-512' : 'SHA-1';
+  
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     key,
-    { name: 'HMAC', hash: 'SHA-1' },
+    { name: 'HMAC', hash: hashAlgo },
     false,
     ['sign']
   );
@@ -41,40 +47,51 @@ async function hmacSha1(key, message) {
   return new Uint8Array(signature);
 }
 
-export async function generateTOTP(secret, period = 30, digits = 6) {
-  try {
-    // Decode base32 secret
-    const decodedSecret = base32Decode(secret);
-    const key = hexToBytes(decodedSecret);
-
-    // Get current time counter
-    const now = Math.floor(Date.now() / 1000);
-    const counter = Math.floor(now / period);
-
-    // Convert counter to 8-byte array
-    const counterBytes = new Uint8Array(8);
-    for (let i = 7; i >= 0; i--) {
-      counterBytes[i] = counter & 0xff;
-      counter >>= 8;
-    }
-
-    // Generate HMAC
-    const hash = await hmacSha1(key, counterBytes);
-
-    // Dynamic truncation
-    const offset = hash[hash.length - 1] & 0xf;
-    const binary =
-      ((hash[offset] & 0x7f) << 24) |
-      ((hash[offset + 1] & 0xff) << 16) |
-      ((hash[offset + 2] & 0xff) << 8) |
-      (hash[offset + 3] & 0xff);
-
-    const otp = binary % Math.pow(10, digits);
-    return otp.toString().padStart(digits, '0');
-  } catch (error) {
-    console.error('TOTP generation error:', error);
-    return '000000';
+export async function generateTOTP(secret, period = 30, digits = 6, algorithm = 'SHA1') {
+  if (!secret || typeof secret !== 'string') {
+    throw new Error('TOTP secret is required and must be a string');
   }
+
+  if (!period || period <= 0) {
+    throw new Error('TOTP period must be a positive number');
+  }
+
+  if (!digits || digits < 6 || digits > 8) {
+    throw new Error('TOTP digits must be between 6 and 8');
+  }
+
+  if (!algorithm || !['SHA1', 'SHA256', 'SHA512'].includes(algorithm.toUpperCase())) {
+    throw new Error('TOTP algorithm must be SHA1, SHA256, or SHA512');
+  }
+
+  // Decode base32 secret
+  const decodedSecret = base32Decode(secret);
+  const key = hexToBytes(decodedSecret);
+
+  // Get current time counter
+  const now = Math.floor(Date.now() / 1000);
+  let counter = Math.floor(now / period);
+
+  // Convert counter to 8-byte array
+  const counterBytes = new Uint8Array(8);
+  for (let i = 7; i >= 0; i--) {
+    counterBytes[i] = counter & 0xff;
+    counter = counter >> 8;
+  }
+
+  // Generate HMAC with specified algorithm
+  const hash = await hmac(key, counterBytes, algorithm);
+
+  // Dynamic truncation
+  const offset = hash[hash.length - 1] & 0xf;
+  const binary =
+    ((hash[offset] & 0x7f) << 24) |
+    ((hash[offset + 1] & 0xff) << 16) |
+    ((hash[offset + 2] & 0xff) << 8) |
+    (hash[offset + 3] & 0xff);
+
+  const otp = binary % Math.pow(10, digits);
+  return otp.toString().padStart(digits, '0');
 }
 
 export function getRemainingTime(period = 30) {

@@ -6,7 +6,7 @@ import { Plus, Copy, Trash2, Smartphone, Upload, Camera, KeyRound } from 'lucide
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -14,7 +14,7 @@ import { encryptData, decryptData } from '../utils/encryption';
 import { generateTOTP, getRemainingTime, parseOtpAuthUrl } from '../utils/totp';
 import jsQR from 'jsqr';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 const API = `${BACKEND_URL}/api`;
 
 export default function Authenticator() {
@@ -42,7 +42,7 @@ export default function Authenticator() {
       setTotps(response.data);
     } catch (error) {
       console.error('Failed to load TOTP codes:', error);
-      toast.error('Failed to load TOTP codes');
+      toast.error('Failed to load authenticators');
     } finally {
       setLoading(false);
     }
@@ -61,19 +61,25 @@ export default function Authenticator() {
       await axios.post(
         `${API}/totp`,
         {
-          ...formData,
-          encryptedSecret
+          serviceName: formData.serviceName,
+          account: formData.account,
+          encryptedSecret,
+          algorithm: formData.algorithm || 'SHA1',
+          digits: formData.digits || 6,
+          period: formData.period || 30,
+          spaceId: 'personal'
         },
         { headers }
       );
 
-      toast.success('TOTP authenticator added');
+      toast.success('Authenticator added successfully');
       setIsAddDialogOpen(false);
       resetForm();
       loadTOTPs();
     } catch (error) {
       console.error('Failed to add TOTP:', error);
-      toast.error('Failed to add TOTP');
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to add authenticator';
+      toast.error(errorMessage);
     }
   };
 
@@ -86,7 +92,9 @@ export default function Authenticator() {
       toast.success('Authenticator deleted');
       loadTOTPs();
     } catch (error) {
-      toast.error('Failed to delete authenticator');
+      console.error('Failed to delete authenticator:', error);
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to delete authenticator';
+      toast.error(errorMessage);
     }
   };
 
@@ -159,7 +167,7 @@ export default function Authenticator() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">Authenticator</h1>
-              <p className="text-gray-600">{totps.length} TOTP codes</p>
+              <p className="text-gray-600">{totps.length} authenticator{totps.length !== 1 ? 's' : ''}</p>
             </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <Button 
@@ -172,7 +180,10 @@ export default function Authenticator() {
               </Button>
               <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                  <DialogTitle>Add TOTP Authenticator</DialogTitle>
+                  <DialogTitle>Add Authenticator</DialogTitle>
+                  <DialogDescription>
+                    Add a new authenticator by scanning a QR code or entering the secret key manually.
+                  </DialogDescription>
                 </DialogHeader>
                 <Tabs defaultValue="manual" className="py-4">
                   <TabsList className="grid w-full grid-cols-2">
@@ -263,7 +274,7 @@ export default function Authenticator() {
           <div className="glass rounded-2xl p-12 text-center">
             <Smartphone className="w-16 h-16 mx-auto mb-4 text-gray-400" />
             <h3 className="text-xl font-bold mb-2">No authenticators yet</h3>
-            <p className="text-gray-600 mb-4">Add your first TOTP authenticator to generate 2FA codes</p>
+            <p className="text-gray-600 mb-4">Add your first authenticator to generate 2FA codes</p>
           </div>
         )}
       </div>
@@ -277,31 +288,45 @@ function TOTPCard({ totp, index, encryptionKey, onDelete }) {
   const [secret, setSecret] = useState('');
 
   useEffect(() => {
+    const decryptSecret = async () => {
+      try {
+        const decrypted = await decryptData(totp.encryptedSecret, encryptionKey);
+        setSecret(decrypted);
+      } catch (error) {
+        console.error('Failed to decrypt TOTP secret:', error);
+        setSecret('');
+      }
+    };
+    
     decryptSecret();
-  }, []);
+  }, [totp.encryptedSecret, encryptionKey]);
 
   useEffect(() => {
     if (!secret) return;
 
     const updateCode = async () => {
-      const newCode = await generateTOTP(secret, totp.period, totp.digits);
-      setCode(newCode);
-      setTimeLeft(getRemainingTime(totp.period));
+      try {
+        if (!secret) {
+          setCode('------');
+          return;
+        }
+        const algorithm = totp.algorithm || 'SHA1';
+        const period = totp.period || 30;
+        const digits = totp.digits || 6;
+        const newCode = await generateTOTP(secret, period, digits, algorithm);
+        setCode(newCode);
+        setTimeLeft(getRemainingTime(period));
+      } catch (error) {
+        console.error('TOTP generation error:', error);
+        setCode('ERROR');
+        toast.error(`TOTP Error: ${error.message}`);
+      }
     };
 
     updateCode();
     const interval = setInterval(updateCode, 1000);
     return () => clearInterval(interval);
-  }, [secret, totp.period, totp.digits]);
-
-  const decryptSecret = async () => {
-    try {
-      const decrypted = await decryptData(totp.encryptedSecret, encryptionKey);
-      setSecret(decrypted);
-    } catch (error) {
-      console.error('Failed to decrypt TOTP secret:', error);
-    }
-  };
+  }, [secret, totp.period, totp.digits, totp.algorithm]);
 
   const handleCopyCode = async () => {
     await navigator.clipboard.writeText(code);

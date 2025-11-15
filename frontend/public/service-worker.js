@@ -1,11 +1,9 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'allone-v1';
+const CACHE_NAME = 'allone-v2';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/css/main.css',
-  '/static/js/main.js',
   '/manifest.json'
 ];
 
@@ -15,6 +13,8 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
+        // Only cache essential files without hashes
+        // CSS and JS files will be cached dynamically by the fetch handler
         return cache.addAll(urlsToCache);
       })
       .catch(err => console.error('Cache open failed:', err))
@@ -24,6 +24,38 @@ self.addEventListener('install', (event) => {
 
 // Fetch event
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Don't cache API calls - always fetch from network
+  if (url.pathname.startsWith('/api/') || url.hostname === 'localhost' && url.port === '8000') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
+  // For navigation requests, always try network first, then cache
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Cache successful navigation responses
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Return cached index.html if network fails
+          return caches.match('/index.html');
+        })
+    );
+    return;
+  }
+  
+  // For static assets (CSS, JS, images, fonts), use cache-first strategy
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -32,15 +64,23 @@ self.addEventListener('fetch', (event) => {
         }
         return fetch(event.request)
           .then((response) => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
+            // Only cache successful GET requests for static assets
+            // This includes CSS, JS, images, fonts, etc. with their hashed filenames
+            if (event.request.method === 'GET' && 
+                response.status === 200 && 
+                response.type === 'basic' &&
+                !url.pathname.startsWith('/api/')) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
             }
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
             return response;
+          })
+          .catch(() => {
+            // For non-navigation requests, return the cached version if available
+            return caches.match(event.request);
           });
       })
   );
@@ -81,8 +121,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'AllOne';
   const options = {
     body: data.body || 'You have a new notification',
-    icon: 'https://customer-assets.emergentagent.com/job_b2b6fbf0-c50c-4972-b29b-b2e5d9c1eec1/artifacts/snhi19yn_Alloneicon.png',
-    badge: 'https://customer-assets.emergentagent.com/job_b2b6fbf0-c50c-4972-b29b-b2e5d9c1eec1/artifacts/snhi19yn_Alloneicon.png',
+    icon: '/Alloneicon.png',
+    badge: '/Alloneicon.png',
     vibrate: [200, 100, 200],
     data: data
   };

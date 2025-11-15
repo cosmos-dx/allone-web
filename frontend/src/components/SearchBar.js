@@ -73,7 +73,7 @@ export default function SearchBar() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
           type="text"
-          placeholder="Search passwords, TOTP codes... (Cmd+K)"
+          placeholder="Search passwords, TOTP codes..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.length > 2 && setIsOpen(true)}
@@ -100,7 +100,7 @@ export default function SearchBar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full mt-2 w-full glass rounded-xl shadow-2xl p-4 max-h-96 overflow-y-auto z-50"
+            className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl p-4 max-h-96 overflow-y-auto z-50 border border-gray-200"
             data-testid="search-results"
           >
             {loading ? (
