@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, X } from 'lucide-react';
 import { Input } from './ui/input';
 import { useAuth } from '../context/AuthContext';
@@ -17,17 +18,49 @@ export default function SearchBar() {
   const { getAuthHeaders } = useAuth();
   const navigate = useNavigate();
   const searchRef = useRef(null);
+  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (inputRef.current) {
+        const rect = inputRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY + 8,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        });
+      }
+    };
+
+    if (isOpen && results) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen, results]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      const isClickInSearch = searchRef.current?.contains(event.target);
+      const isClickInDropdown = dropdownRef.current?.contains(event.target);
+      
+      if (!isClickInSearch && !isClickInDropdown) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const searchDebounce = setTimeout(() => {
@@ -72,6 +105,7 @@ export default function SearchBar() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
+          ref={inputRef}
           type="text"
           placeholder="Search passwords, TOTP codes..."
           value={query}
@@ -94,13 +128,20 @@ export default function SearchBar() {
         )}
       </div>
 
-      <AnimatePresence>
-        {isOpen && results && (
+      {isOpen && results && createPortal(
+        <AnimatePresence>
           <motion.div
+            ref={dropdownRef}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl p-4 max-h-96 overflow-y-auto z-50 border border-gray-200"
+            className="fixed bg-white rounded-xl shadow-2xl p-4 max-h-96 overflow-y-auto border border-gray-200"
+            style={{ 
+              zIndex: 9999,
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`
+            }}
             data-testid="search-results"
           >
             {loading ? (
@@ -147,8 +188,9 @@ export default function SearchBar() {
               </div>
             )}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

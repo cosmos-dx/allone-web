@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Bell, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '../hooks/useNotifications';
@@ -8,12 +9,40 @@ import { formatDistanceToNow } from 'date-fns';
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
   const { notifications, unreadCount, markAsRead, deleteNotification, clearAll } = useNotifications();
   const navigate = useNavigate();
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY + 8,
+          right: window.innerWidth - rect.right + window.scrollX
+        });
+      }
+    };
+
+    if (isOpen) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const isClickInButton = buttonRef.current?.contains(event.target);
+      const isClickInDropdown = dropdownRef.current?.contains(event.target);
+      
+      if (!isClickInButton && !isClickInDropdown) {
         setIsOpen(false);
       }
     };
@@ -62,8 +91,9 @@ export default function NotificationDropdown() {
   const recentNotifications = notifications.slice(0, 10);
 
   return (
-    <div className="relative" ref={dropdownRef} style={{ isolation: 'isolate' }}>
+    <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
         data-testid="notification-bell-btn"
@@ -76,15 +106,18 @@ export default function NotificationDropdown() {
         )}
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
+      {isOpen && createPortal(
+        <AnimatePresence>
           <motion.div
+            ref={dropdownRef}
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-hidden flex flex-col"
+            className="fixed w-80 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-96 overflow-hidden flex flex-col"
             style={{ 
-              contain: 'layout style paint',
+              zIndex: 9999,
+              top: `${dropdownPosition.top}px`,
+              right: `${dropdownPosition.right}px`,
               willChange: 'transform, opacity'
             }}
           >
@@ -95,7 +128,7 @@ export default function NotificationDropdown() {
               )}
             </div>
 
-            <div className="overflow-y-auto flex-1" style={{ contain: 'layout style paint' }}>
+            <div className="overflow-y-auto flex-1">
               {recentNotifications.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -110,7 +143,6 @@ export default function NotificationDropdown() {
                       className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
                         !notification.read ? 'bg-blue-50' : ''
                       }`}
-                      style={{ contain: 'layout style' }}
                     >
                       <div className="flex items-start gap-3">
                         <div className="text-2xl flex-shrink-0">
@@ -166,8 +198,9 @@ export default function NotificationDropdown() {
               </div>
             )}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
