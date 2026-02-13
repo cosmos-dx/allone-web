@@ -1,0 +1,93 @@
+{
+    "project_info": {
+      "project_number": "368464651413",
+      "project_id": "allone-90859",
+      "storage_bucket": "allone-90859.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:368464651413:android:61e00103bfe2f67853279c",
+          "android_client_info": {
+            "package_name": "com.allone.co.in"
+          }
+        },
+        "oauth_client": [
+          {
+            "client_id": "368464651413-04seid7s33jfd4iguhmb2tqrqrcl2j9g.apps.googleusercontent.com",
+            "client_type": 3
+          }
+        ],
+        "api_key": [
+          {
+            "current_key": "AIzaSyAjqE44igxkAy24cKm3PS8vwEd7d9akTw0"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": [
+              {
+                "client_id": "368464651413-04seid7s33jfd4iguhmb2tqrqrcl2j9g.apps.googleusercontent.com",
+                "client_type": 3
+              }
+            ]
+          }
+        }
+      },
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:368464651413:android:ca9142f75a387bfd53279c",
+          "android_client_info": {
+            "package_name": "com.allone.planner_app"
+          }
+        },
+        "oauth_client": [
+          {
+            "client_id": "368464651413-3nmas5jbp3tbbmvi531eha287lfo9kdn.apps.googleusercontent.com",
+            "client_type": 1,
+            "android_info": {
+              "package_name": "com.allone.planner_app",
+              "certificate_hash": "b0134eecd4a42838cdba90d826d093a7b83494af"
+            }
+          },
+          {
+            "client_id": "368464651413-ago7v0jo2ndugecpjefj3gif7esucfv1.apps.googleusercontent.com",
+            "client_type": 1,
+            "android_info": {
+              "package_name": "com.allone.planner_app",
+              "certificate_hash": "ab6a119f7d1a8ac7d1829d1846a91dae452f7f9b"
+            }
+          },
+          {
+            "client_id": "368464651413-jmftv1vj2jlbfgqcu1u6utifjpdsq8at.apps.googleusercontent.com",
+            "client_type": 1,
+            "android_info": {
+              "package_name": "com.allone.planner_app",
+              "certificate_hash": "6770f327d9d94f93697a5bb2b5c58a23b9bfc29a"
+            }
+          },
+          {
+            "client_id": "368464651413-04seid7s33jfd4iguhmb2tqrqrcl2j9g.apps.googleusercontent.com",
+            "client_type": 3
+          }
+        ],
+        "api_key": [
+          {
+            "current_key": "AIzaSyAjqE44igxkAy24cKm3PS8vwEd7d9akTw0"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": [
+              {
+                "client_id": "368464651413-04seid7s33jfd4iguhmb2tqrqrcl2j9g.apps.googleusercontent.com",
+                "client_type": 3
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }
+

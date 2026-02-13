@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "AllOne",
+    "slug": "allone-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/Alloneicon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/Allonelogo.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.allone.co.in",
+      "infoPlist": {
+        "NSUserActivityTypes": [
+          "INSendMessageIntent"
+        ]
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/Alloneicon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.allone.co.in",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/Alloneicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/Alloneicon.png",
+          "color": "#ffffff"
+        }
+      ],
+      [
+        "@react-native-firebase/app"
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "allone-90859"
+      }
+    }
+  }
+}
+

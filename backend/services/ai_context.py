@@ -5,9 +5,6 @@ NEVER includes password values or TOTP secrets
 """
 import logging
 from typing import Dict, List, Optional
-from backend.config import (
-    space_repo, password_repo, totp_repo, bill_repo, user_repo
-)
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +17,11 @@ class AIContextService:
         Gather comprehensive user context
         NEVER includes password values or TOTP secrets
         """
+        # Lazy import to avoid circular dependency
+        from backend.config import (
+            space_repo, password_repo, totp_repo, bill_repo, user_repo
+        )
+        
         context = {
             "user_id": user_id,
             "spaces": [],

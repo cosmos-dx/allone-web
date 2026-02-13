@@ -4,9 +4,12 @@ Password Repository - Data access layer for passwords
 from typing import Dict, Optional, List
 from firebase_admin import firestore
 from backend.constants import COLLECTIONS, ERROR_MESSAGES, QUERY_LIMITS
+from backend.services.cache_service import cache_service
 import logging
 
 logger = logging.getLogger(__name__)
+
+CACHE_TTL = 300
 
 class PasswordRepository:
     def __init__(self, db: firestore.Client):
@@ -17,10 +20,15 @@ class PasswordRepository:
         """Get passwords by user ID, optionally filtered by space and including shared items"""
         if not self.db:
             raise ValueError(ERROR_MESSAGES['DATABASE_UNAVAILABLE'])
+        
+        cache_key = f"passwords_{user_id}_{space_id or 'all'}_{include_shared}"
+        cached = cache_service.get(cache_key)
+        if cached is not None:
+            return cached
+        
         try:
             passwords = []
             
-            # Get passwords owned by user
             query = self.db.collection(self.collection).where('userId', '==', user_id)
             if space_id:
                 query = query.where('spaceId', '==', space_id)
@@ -31,26 +39,50 @@ class PasswordRepository:
                 data['isShared'] = False
                 passwords.append(data)
             
-            # Get shared passwords if include_shared is True
             if include_shared:
-                # Get spaces where user is a member
                 member_spaces = self.db.collection(COLLECTIONS['SPACES']).where('members', 'array_contains', user_id).stream()
                 shared_space_ids = [doc.id for doc in member_spaces]
                 
-                # Get passwords from shared spaces
-                for shared_space_id in shared_space_ids:
-                    shared_query = self.db.collection(self.collection).where('spaceId', '==', shared_space_id)
-                    if space_id and space_id != shared_space_id:
-                        continue
-                    shared_docs = shared_query.limit(QUERY_LIMITS['PASSWORDS']).stream()
-                    for doc in shared_docs:
-                        data = doc.to_dict()
-                        # Don't include if user owns it (already in list)
-                        if data.get('userId') != user_id:
-                            data['passwordId'] = doc.id
-                            data['isShared'] = True
-                            passwords.append(data)
+                if len(shared_space_ids) > 0 and len(shared_space_ids) <= 10:
+                    space_cache_key = f"spaces_member_{user_id}"
+                    space_cache = cache_service.get(space_cache_key)
+                    if space_cache is None:
+                        cache_service.set(space_cache_key, shared_space_ids, CACHE_TTL)
+                    
+                    if space_id:
+                        if space_id in shared_space_ids:
+                            shared_query = self.db.collection(self.collection).where('spaceId', '==', space_id)
+                            shared_docs = shared_query.limit(QUERY_LIMITS['PASSWORDS']).stream()
+                            for doc in shared_docs:
+                                data = doc.to_dict()
+                                if data.get('userId') != user_id:
+                                    data['passwordId'] = doc.id
+                                    data['isShared'] = True
+                                    passwords.append(data)
+                    else:
+                        for shared_space_id in shared_space_ids:
+                            shared_query = self.db.collection(self.collection).where('spaceId', '==', shared_space_id)
+                            shared_docs = shared_query.limit(QUERY_LIMITS['PASSWORDS']).stream()
+                            for doc in shared_docs:
+                                data = doc.to_dict()
+                                if data.get('userId') != user_id:
+                                    data['passwordId'] = doc.id
+                                    data['isShared'] = True
+                                    passwords.append(data)
+                else:
+                    for shared_space_id in shared_space_ids:
+                        if space_id and space_id != shared_space_id:
+                            continue
+                        shared_query = self.db.collection(self.collection).where('spaceId', '==', shared_space_id)
+                        shared_docs = shared_query.limit(QUERY_LIMITS['PASSWORDS']).stream()
+                        for doc in shared_docs:
+                            data = doc.to_dict()
+                            if data.get('userId') != user_id:
+                                data['passwordId'] = doc.id
+                                data['isShared'] = True
+                                passwords.append(data)
             
+            cache_service.set(cache_key, passwords, CACHE_TTL)
             return passwords
         except Exception as e:
             logger.error(f"Error fetching passwords: {e}", exc_info=True)
@@ -82,6 +114,11 @@ class PasswordRepository:
             doc_ref = self.db.collection(self.collection).document(password_id)
             doc_ref.set(password_data)
             password_data['passwordId'] = password_id
+            
+            user_id = password_data.get('userId')
+            if user_id:
+                cache_service.invalidate_pattern(f"passwords_{user_id}_")
+            
             return password_data
         except Exception as e:
             logger.error(f"Error creating password: {e}", exc_info=True)
@@ -92,8 +129,14 @@ class PasswordRepository:
         if not self.db:
             raise ValueError(ERROR_MESSAGES['DATABASE_UNAVAILABLE'])
         try:
+            existing = self.get_by_id(password_id)
             doc_ref = self.db.collection(self.collection).document(password_id)
             doc_ref.update(updates)
+            
+            if existing:
+                user_id = existing.get('userId')
+                if user_id:
+                    cache_service.invalidate_pattern(f"passwords_{user_id}_")
         except Exception as e:
             logger.error(f"Error updating password {password_id}: {e}", exc_info=True)
             raise
@@ -103,8 +146,14 @@ class PasswordRepository:
         if not self.db:
             raise ValueError(ERROR_MESSAGES['DATABASE_UNAVAILABLE'])
         try:
+            existing = self.get_by_id(password_id)
             doc_ref = self.db.collection(self.collection).document(password_id)
             doc_ref.delete()
+            
+            if existing:
+                user_id = existing.get('userId')
+                if user_id:
+                    cache_service.invalidate_pattern(f"passwords_{user_id}_")
         except Exception as e:
             logger.error(f"Error deleting password {password_id}: {e}", exc_info=True)
             raise

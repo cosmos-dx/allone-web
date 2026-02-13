@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+backend.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Service account (should be volume mounted, not copied)
+service-account.json
+
+# Git
+.git/
+.gitignore
+
+# Build artifacts
+dist/
+build/
+
+

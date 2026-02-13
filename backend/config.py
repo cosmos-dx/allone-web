@@ -68,7 +68,9 @@ db = initialize_firestore()
 # Environment variables
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key')
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', 'your_open_api_key')
-CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
+# CORS origins - for web frontend
+# Note: Mobile apps don't use CORS, but we include common origins
+CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,https://allone.co.in').split(',')
 
 # Initialize repositories (will be imported by routes)
 from backend.repositories import (

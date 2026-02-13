@@ -3,6 +3,10 @@ import { spaceService } from '../services/spaceService';
 import { spaceAdapter } from '../adapters/spaceAdapter';
 import { toast } from 'sonner';
 
+const CACHE_TTL = 5 * 60 * 1000;
+const STORAGE_TTL = 10 * 60 * 1000;
+const STORAGE_KEY_PREFIX = 'space_cache_';
+
 const useSpaceStore = create((set, get) => ({
   // State
   spaces: [],
@@ -31,18 +35,39 @@ const useSpaceStore = create((set, get) => ({
     timestamp: null
   },
 
-  // Load spaces with caching
   loadSpaces: async (forceRefresh = false) => {
     const { cache } = get();
-    const CACHE_TTL = 30 * 1000; // 30 seconds
     
-    // Check cache
     if (!forceRefresh && cache.data && cache.timestamp) {
       const age = Date.now() - cache.timestamp;
       if (age < CACHE_TTL) {
-        // Use cached data
         get().setSpaces(cache.data);
         return cache.data;
+      }
+    }
+
+    const storageKey = `${STORAGE_KEY_PREFIX}all`;
+    if (!forceRefresh) {
+      try {
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          const { data, timestamp } = JSON.parse(stored);
+          const age = Date.now() - timestamp;
+          if (age < STORAGE_TTL) {
+            get().setSpaces(data);
+            set({
+              cache: {
+                data,
+                timestamp: Date.now()
+              }
+            });
+            return data;
+          } else {
+            localStorage.removeItem(storageKey);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load from localStorage:', e);
       }
     }
 
@@ -50,13 +75,18 @@ const useSpaceStore = create((set, get) => ({
     try {
       const spaces = await spaceService.getAll();
       get().setSpaces(spaces);
-      // Update cache
+      const now = Date.now();
       set({
         cache: {
           data: spaces,
-          timestamp: Date.now()
+          timestamp: now
         }
       });
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ data: spaces, timestamp: now }));
+      } catch (e) {
+        console.warn('Failed to save to localStorage:', e);
+      }
       return spaces;
     } catch (error) {
       console.error('Failed to load spaces:', error);
@@ -68,7 +98,6 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Create space
   createSpace: async (spaceData) => {
     try {
       const apiData = spaceAdapter.toAPI(spaceData);
@@ -76,7 +105,9 @@ const useSpaceStore = create((set, get) => ({
       const uiSpace = spaceAdapter.toUI(created);
       set((state) => ({
         spaces: [...state.spaces, uiSpace],
+        cache: { data: null, timestamp: null }
       }));
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
       toast.success('Space created successfully');
       return uiSpace;
     } catch (error) {
@@ -86,7 +117,6 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Update space
   updateSpace: async (spaceId, spaceData) => {
     try {
       const apiData = spaceAdapter.toAPI(spaceData);
@@ -94,7 +124,9 @@ const useSpaceStore = create((set, get) => ({
       const uiSpace = spaceAdapter.toUI(updated);
       set((state) => ({
         spaces: state.spaces.map(s => s.id === spaceId ? uiSpace : s),
+        cache: { data: null, timestamp: null }
       }));
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
       toast.success('Space updated successfully');
       return uiSpace;
     } catch (error) {
@@ -104,13 +136,14 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Delete space
   deleteSpace: async (spaceId) => {
     try {
       await spaceService.delete(spaceId);
       set((state) => ({
         spaces: state.spaces.filter(s => s.id !== spaceId),
+        cache: { data: null, timestamp: null }
       }));
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
       toast.success('Space deleted');
     } catch (error) {
       console.error('Failed to delete space:', error);
@@ -119,14 +152,15 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Add member
   addMember: async (spaceId, userId) => {
     try {
       const updated = await spaceService.addMember(spaceId, userId);
       const uiSpace = spaceAdapter.toUI(updated);
       set((state) => ({
         spaces: state.spaces.map(s => s.id === spaceId ? uiSpace : s),
+        cache: { data: null, timestamp: null }
       }));
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
       toast.success('Member added to space');
       return uiSpace;
     } catch (error) {
@@ -137,14 +171,15 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Remove member
   removeMember: async (spaceId, memberId) => {
     try {
       const updated = await spaceService.removeMember(spaceId, memberId);
       const uiSpace = spaceAdapter.toUI(updated);
       set((state) => ({
         spaces: state.spaces.map(s => s.id === spaceId ? uiSpace : s),
+        cache: { data: null, timestamp: null }
       }));
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
       toast.success('Member removed from space');
       return uiSpace;
     } catch (error) {
@@ -155,14 +190,15 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Transfer ownership
   transferOwnership: async (spaceId, newOwnerId) => {
     try {
       const updated = await spaceService.transferOwnership(spaceId, newOwnerId);
       const uiSpace = spaceAdapter.toUI(updated);
       set((state) => ({
         spaces: state.spaces.map(s => s.id === spaceId ? uiSpace : s),
+        cache: { data: null, timestamp: null }
       }));
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
       toast.success('Ownership transferred successfully');
       return uiSpace;
     } catch (error) {
@@ -172,14 +208,15 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Add admin
   addAdmin: async (spaceId, userId) => {
     try {
       const updated = await spaceService.addAdmin(spaceId, userId);
       const uiSpace = spaceAdapter.toUI(updated);
       set((state) => ({
         spaces: state.spaces.map(s => s.id === spaceId ? uiSpace : s),
+        cache: { data: null, timestamp: null }
       }));
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
       toast.success('Admin added successfully');
       return uiSpace;
     } catch (error) {
@@ -189,11 +226,12 @@ const useSpaceStore = create((set, get) => ({
     }
   },
 
-  // Remove admin
   removeAdmin: async (spaceId, adminId) => {
     try {
       await spaceService.removeAdmin(spaceId, adminId);
-      await get().loadSpaces(); // Reload to get updated space
+      set({ cache: { data: null, timestamp: null } });
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}all`);
+      await get().loadSpaces();
       toast.success('Admin removed successfully');
     } catch (error) {
       console.error('Failed to remove admin:', error);

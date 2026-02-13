@@ -3,8 +3,9 @@ import { passwordService } from '../services/passwordService';
 import { passwordAdapter } from '../adapters/passwordAdapter';
 import { toast } from 'sonner';
 
-// Cache TTL: 30 seconds
-const CACHE_TTL = 30 * 1000;
+const CACHE_TTL = 5 * 60 * 1000;
+const STORAGE_TTL = 10 * 60 * 1000;
+const STORAGE_KEY_PREFIX = 'password_cache_';
 
 const usePasswordStore = create((set, get) => ({
   // State
@@ -30,18 +31,41 @@ const usePasswordStore = create((set, get) => ({
 
   setError: (error) => set({ error }),
 
-  // Load passwords with caching
   loadPasswords: async (spaceId = null, includeShared = true, forceRefresh = false) => {
     const cacheKey = `passwords_${spaceId || 'all'}_${includeShared}`;
     const { cache } = get();
     
-    // Check cache
     if (!forceRefresh && cache.data && cache.key === cacheKey && cache.timestamp) {
       const age = Date.now() - cache.timestamp;
       if (age < CACHE_TTL) {
-        // Use cached data
         get().setPasswords(cache.data);
         return cache.data;
+      }
+    }
+
+    const storageKey = `${STORAGE_KEY_PREFIX}${cacheKey}`;
+    if (!forceRefresh) {
+      try {
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          const { data, timestamp } = JSON.parse(stored);
+          const age = Date.now() - timestamp;
+          if (age < STORAGE_TTL) {
+            get().setPasswords(data);
+            set({
+              cache: {
+                data,
+                timestamp: Date.now(),
+                key: cacheKey
+              }
+            });
+            return data;
+          } else {
+            localStorage.removeItem(storageKey);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load from localStorage:', e);
       }
     }
 
@@ -49,14 +73,19 @@ const usePasswordStore = create((set, get) => ({
     try {
       const passwords = await passwordService.getAll(spaceId, includeShared);
       get().setPasswords(passwords);
-      // Update cache
+      const now = Date.now();
       set({
         cache: {
           data: passwords,
-          timestamp: Date.now(),
+          timestamp: now,
           key: cacheKey
         }
       });
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ data: passwords, timestamp: now }));
+      } catch (e) {
+        console.warn('Failed to save to localStorage:', e);
+      }
       return passwords;
     } catch (error) {
       console.error('Failed to load passwords:', error);
@@ -68,7 +97,6 @@ const usePasswordStore = create((set, get) => ({
     }
   },
 
-  // Create password
   createPassword: async (passwordData) => {
     try {
       const apiData = passwordAdapter.toAPI(passwordData);
@@ -77,7 +105,13 @@ const usePasswordStore = create((set, get) => ({
       set((state) => ({
         passwords: [...state.passwords, uiPassword],
         filteredPasswords: [...state.filteredPasswords, uiPassword],
+        cache: { data: null, timestamp: null, key: null }
       }));
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(STORAGE_KEY_PREFIX)) {
+          localStorage.removeItem(key);
+        }
+      });
       toast.success('Password added successfully');
       return uiPassword;
     } catch (error) {
@@ -88,7 +122,6 @@ const usePasswordStore = create((set, get) => ({
     }
   },
 
-  // Update password
   updatePassword: async (passwordId, passwordData) => {
     try {
       const apiData = passwordAdapter.toAPI(passwordData);
@@ -97,7 +130,13 @@ const usePasswordStore = create((set, get) => ({
       set((state) => ({
         passwords: state.passwords.map(p => p.id === passwordId ? uiPassword : p),
         filteredPasswords: state.filteredPasswords.map(p => p.id === passwordId ? uiPassword : p),
+        cache: { data: null, timestamp: null, key: null }
       }));
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(STORAGE_KEY_PREFIX)) {
+          localStorage.removeItem(key);
+        }
+      });
       toast.success('Password updated successfully');
       return uiPassword;
     } catch (error) {
@@ -107,14 +146,19 @@ const usePasswordStore = create((set, get) => ({
     }
   },
 
-  // Delete password
   deletePassword: async (passwordId) => {
     try {
       await passwordService.delete(passwordId);
       set((state) => ({
         passwords: state.passwords.filter(p => p.id !== passwordId),
         filteredPasswords: state.filteredPasswords.filter(p => p.id !== passwordId),
+        cache: { data: null, timestamp: null, key: null }
       }));
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(STORAGE_KEY_PREFIX)) {
+          localStorage.removeItem(key);
+        }
+      });
       toast.success('Password deleted');
     } catch (error) {
       console.error('Failed to delete password:', error);

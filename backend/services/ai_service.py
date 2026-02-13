@@ -12,9 +12,6 @@ from backend.config import OPENAI_API_KEY
 from backend.services.ai_context import context_service
 from backend.services.intent_guard import IntentGuard, IntentType
 from backend.services.guard_rails import GuardRails
-from backend.config import (
-    password_repo, totp_repo, space_repo, user_repo, bill_repo
-)
 from datetime import datetime, timezone
 import bcrypt
 
@@ -333,6 +330,9 @@ RESPONSE GUIDELINES:
     
     def _create_space(self, args: Dict, user_id: str) -> Dict:
         """Create space directly (no encryption needed)"""
+        # Lazy import to avoid circular dependency
+        from backend.config import space_repo
+        
         if not args.get("name") or not args.get("type"):
             return {"success": False, "error": "name and type are required"}
         
@@ -367,6 +367,9 @@ RESPONSE GUIDELINES:
     
     def _get_password_details(self, args: Dict, user_id: str) -> Dict:
         """Get password details (metadata only) - NEVER returns password value"""
+        # Lazy import to avoid circular dependency
+        from backend.config import password_repo
+        
         if not password_repo:
             return {"success": False, "error": "Database unavailable"}
         
@@ -451,6 +454,9 @@ RESPONSE GUIDELINES:
     
     def _search_passwords(self, args: Dict, user_id: str) -> Dict:
         """Search passwords - returns metadata and instructions, NEVER actual passwords"""
+        # Lazy import to avoid circular dependency
+        from backend.config import password_repo
+        
         if not password_repo:
             return {"success": False, "error": "Database unavailable"}
         
@@ -591,6 +597,9 @@ RESPONSE GUIDELINES:
     
     def _toggle_setting(self, args: Dict, user_id: str) -> Dict:
         """Toggle user setting"""
+        # Lazy import to avoid circular dependency
+        from backend.config import user_repo
+        
         if not user_repo:
             return {"success": False, "error": "Database unavailable"}
         
@@ -649,6 +658,9 @@ RESPONSE GUIDELINES:
     
     def _create_passkey(self, args: Dict, user_id: str) -> Dict:
         """Create or update master password (passkey)"""
+        # Lazy import to avoid circular dependency
+        from backend.config import user_repo
+        
         if not user_repo:
             return {"success": False, "error": "Database unavailable"}
         

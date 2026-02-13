@@ -4,9 +4,13 @@ User Repository - Data access layer for users
 from typing import Dict, Optional, List
 from firebase_admin import firestore, auth
 from backend.constants import COLLECTIONS, ERROR_MESSAGES
+from backend.services.cache_service import cache_service
 import logging
 
 logger = logging.getLogger(__name__)
+
+CACHE_TTL = 600
+SEARCH_CACHE_TTL = 120
 
 class UserRepository:
     def __init__(self, db: firestore.Client):
@@ -17,14 +21,20 @@ class UserRepository:
         """Get user by ID (excludes inactive users unless explicitly requested)"""
         if not self.db:
             raise ValueError(ERROR_MESSAGES['DATABASE_UNAVAILABLE'])
+        
+        cache_key = f"user_{user_id}"
+        cached = cache_service.get(cache_key)
+        if cached is not None:
+            return cached
+        
         try:
             doc = self.db.collection(self.collection).document(user_id).get()
             if doc.exists:
                 data = doc.to_dict()
-                # Filter out inactive users (soft deleted)
                 if data.get('active') is False:
                     return None
                 data['userId'] = doc.id
+                cache_service.set(cache_key, data, CACHE_TTL)
                 return data
             return None
         except Exception as e:
@@ -39,6 +49,7 @@ class UserRepository:
             user_id = user_data['userId']
             doc_ref = self.db.collection(self.collection).document(user_id)
             doc_ref.set(user_data)
+            cache_service.set(f"user_{user_id}", user_data, CACHE_TTL)
             return user_data
         except Exception as e:
             logger.error(f"Error creating user: {e}", exc_info=True)
@@ -51,6 +62,7 @@ class UserRepository:
         try:
             doc_ref = self.db.collection(self.collection).document(user_id)
             doc_ref.update(updates)
+            cache_service.delete(f"user_{user_id}")
         except Exception as e:
             logger.error(f"Error updating user {user_id}: {e}", exc_info=True)
             raise
@@ -62,15 +74,18 @@ class UserRepository:
             logger.warning(f"Search query too short: '{query}'")
             return []
         
+        cache_key = f"user_search_{search_query}_{limit}"
+        cached = cache_service.get(cache_key)
+        if cached is not None:
+            return cached
+        
         logger.info(f"🔍 Starting user search for query: '{query}' (normalized: '{search_query}')")
         results = []
         seen_user_ids = set()
         
-        # First, search Firebase Auth users (authenticated users)
         logger.info("📍 Searching Firebase Authentication users...")
         try:
-            # List Firebase Auth users (paginated, but limit total pages for performance)
-            max_pages = 10  # Limit to first 10 pages (1000 users per page = 10,000 users max)
+            max_pages = 3
             page = auth.list_users(max_results=1000)
             page_count = 0
             total_users_checked = 0
@@ -183,6 +198,8 @@ class UserRepository:
             except Exception as e:
                 logger.error(f"❌ Error searching Firestore users: {e}", exc_info=True)
         
-        logger.info(f"🎯 FINAL RESULT: Returning {len(results)} users for query '{query}'")
-        return results[:limit]
+        final_results = results[:limit]
+        cache_service.set(cache_key, final_results, SEARCH_CACHE_TTL)
+        logger.info(f"🎯 FINAL RESULT: Returning {len(final_results)} users for query '{query}'")
+        return final_results
 

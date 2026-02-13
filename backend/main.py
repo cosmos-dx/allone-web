@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from backend.config import CORS_ORIGINS, logger
+from backend.middleware.rate_limit import rate_limit_middleware
 from backend.routes import (
     auth_router,
     password_router,
@@ -33,6 +34,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add rate limiting middleware
+app.middleware("http")(rate_limit_middleware)
 
 # Include routers
 # IMPORTANT: More specific routes (bill_router) must be registered BEFORE less specific ones (space_router)

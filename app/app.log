@@ -1,0 +1,233 @@
+Starting project at /Users/abhishekgupta/code/personal/allone/app
+Starting Metro Bundler
+› Opening emulator Medium_Phone_API_36.0
+› Opening exp+allone-mobile://expo-development-client/?url=http%3A%2F%2F192.168.1.4%3A8081 on Medium_Phone_API_36.0
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Android Bundled 791ms node_modules/expo/AppEntry.js (1386 modules)
+ WARN  Clipboard has been extracted from react-native core and will be removed in a future release. It can now be installed and imported from '@react-native-clipboard/clipboard' instead of 'react-native'. See https://github.com/react-native-clipboard/clipboard
+ LOG  ✅ Backend session created successfully
+ ERROR  Failed to load dashboard data: [AxiosError: Request failed with status code 401]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+ ERROR  The action 'REPLACE' with payload {"name":"Landing"} was not handled by any navigator.
+
+Do you have a screen named 'Landing'?
+
+If you're trying to navigate to a screen in a nested navigator, see https://reactnavigation.org/docs/nesting-navigators#navigating-to-a-screen-in-a-nested-navigator.
+
+This is a development-only warning and won't be shown in production.
+ ERROR  TOTP generation error: [Error: Invalid base32 character]
+transform[stderr]: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+transform[stderr]: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+transform[stderr]: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ LOG  ✅ Backend session created successfully
+ ERROR  Failed to load dashboard data: [AxiosError: Request failed with status code 401]
+ ERROR  Failed to load dashboard data: [AxiosError: Request failed with status code 401]
+ ERROR  Failed to load space: [AxiosError: Request failed with status code 404]
+transform[stderr]: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+transform[stderr]: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+transform[stderr]: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ LOG  Syncing 38 passwords to autofill storage
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Failed to decrypt password pwd_039cd42a-ca0b-4e3d-95fb-f514d931817a: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_0bbef8f9-a328-4646-abaf-f9a9a42ce959: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_28c0a9e4-74e8-4696-b3e7-a959e32490c7: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_292131a6-03e0-4fb0-8d07-f922a60e4ba9: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_2a1446d0-82f3-4912-bf8d-569c2b748759: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_331356f6-6389-4041-bad6-005d3df2835b: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_3a6f16ac-316f-40d5-a6a6-d3f850fb8ca3: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_3e4205e0-d49b-446e-8eac-c9f273be253c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_4377662e-dff2-4710-9c86-a9043befde18: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_46f9baa8-5590-43a5-9146-495b4582210b: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_46fb185f-2121-41d1-a5b9-547e6eb03beb: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_481d5618-a6ba-40fa-b384-7da6cf2840a8: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_4cbf4f3c-be70-4703-a859-de4d6fb08e9d: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_542d596b-51f2-4e1e-95df-3cf889eced61: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_6710d30f-b957-49a7-8772-b65eeeb1d12c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_6a9ff355-ac52-4587-a304-5797ab4fa387: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_6b0a238b-51af-42de-bff7-04653ed6ee28: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_7062dee2-d76f-4f48-9f97-a25b34827bd3: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_71ae2d1e-a9be-40a0-b235-b3fdf93435ef: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_72455881-f0b7-4521-931e-affc668f7f75: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_79b19039-5617-407e-9803-97b29cb3a9f6: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_87c28bad-0a2a-4df2-8a16-7ec8d20cd66e: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_892c152c-8f18-4b72-9234-36497ad85ab7: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_9a02e968-4099-4844-b18a-1f2c86c9dc0a: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_9bb728ad-a058-402c-a666-24b10eec770c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_b52e9164-7ee3-4045-9d17-8b89b6d7cb60: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_cb128e44-78b3-4ab1-bd6a-497460db6633: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_cc872622-a806-4a85-a9b6-c4947e1031bd: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_cffb48ce-20b2-4d02-9237-1c8f0477d850: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e4ed2fdf-a245-4923-83d7-348a419af3a4: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e7232769-09cf-40a8-89f8-e7fc104fe5b5: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e814cfea-3fa3-4704-ad67-112da656cf5c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e980e5b7-f2a3-48c9-a9eb-82c3cae91761: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_ebe04ed5-6a96-41f6-ad5f-4528c5c72862: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_ef192da4-ee51-45bc-aede-83f8afbd0278: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_f97ea219-cf65-4dba-94df-09b33f782de7: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_fab9ffa5-c787-474f-8bc8-e471c01b384c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_5a042832-b05d-46b5-9263-904524920c41: [Error: Failed to decrypt data]
+ WARN  AutofillSyncModule not available, passwords not synced to autofill
+ LOG  Successfully synced 0 passwords to autofill
+ LOG  Syncing 38 passwords to autofill storage
+ LOG  ✅ Backend session created successfully
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Decryption error: [Error: Invalid encrypted data format]
+ ERROR  Failed to decrypt password pwd_039cd42a-ca0b-4e3d-95fb-f514d931817a: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_0bbef8f9-a328-4646-abaf-f9a9a42ce959: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_28c0a9e4-74e8-4696-b3e7-a959e32490c7: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_292131a6-03e0-4fb0-8d07-f922a60e4ba9: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_2a1446d0-82f3-4912-bf8d-569c2b748759: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_331356f6-6389-4041-bad6-005d3df2835b: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_3a6f16ac-316f-40d5-a6a6-d3f850fb8ca3: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_3e4205e0-d49b-446e-8eac-c9f273be253c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_4377662e-dff2-4710-9c86-a9043befde18: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_46f9baa8-5590-43a5-9146-495b4582210b: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_46fb185f-2121-41d1-a5b9-547e6eb03beb: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_481d5618-a6ba-40fa-b384-7da6cf2840a8: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_4cbf4f3c-be70-4703-a859-de4d6fb08e9d: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_542d596b-51f2-4e1e-95df-3cf889eced61: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_6710d30f-b957-49a7-8772-b65eeeb1d12c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_6a9ff355-ac52-4587-a304-5797ab4fa387: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_6b0a238b-51af-42de-bff7-04653ed6ee28: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_7062dee2-d76f-4f48-9f97-a25b34827bd3: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_71ae2d1e-a9be-40a0-b235-b3fdf93435ef: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_72455881-f0b7-4521-931e-affc668f7f75: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_79b19039-5617-407e-9803-97b29cb3a9f6: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_87c28bad-0a2a-4df2-8a16-7ec8d20cd66e: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_892c152c-8f18-4b72-9234-36497ad85ab7: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_9a02e968-4099-4844-b18a-1f2c86c9dc0a: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_9bb728ad-a058-402c-a666-24b10eec770c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_b52e9164-7ee3-4045-9d17-8b89b6d7cb60: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_cb128e44-78b3-4ab1-bd6a-497460db6633: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_cc872622-a806-4a85-a9b6-c4947e1031bd: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_cffb48ce-20b2-4d02-9237-1c8f0477d850: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e4ed2fdf-a245-4923-83d7-348a419af3a4: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e7232769-09cf-40a8-89f8-e7fc104fe5b5: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e814cfea-3fa3-4704-ad67-112da656cf5c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_e980e5b7-f2a3-48c9-a9eb-82c3cae91761: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_ebe04ed5-6a96-41f6-ad5f-4528c5c72862: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_ef192da4-ee51-45bc-aede-83f8afbd0278: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_f97ea219-cf65-4dba-94df-09b33f782de7: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_fab9ffa5-c787-474f-8bc8-e471c01b384c: [Error: Failed to decrypt data]
+ ERROR  Failed to decrypt password pwd_5a042832-b05d-46b5-9263-904524920c41: [Error: Failed to decrypt data]
+ WARN  AutofillSyncModule not available, passwords not synced to autofill
+ LOG  Successfully synced 0 passwords to autofill
+ ERROR  Failed to load bills: [AxiosError: Request failed with status code 401]
+error: SyntaxError: /Users/abhishekgupta/code/personal/allone/app/src/components/passwords/PasswordCard.js: Identifier 'styles' has already been declared. (231:6)
+
+  229 | PasswordCard.displayName = 'PasswordCard';
+  230 |
+> 231 | const styles = StyleSheet.create({
+      |       ^
+  232 |   container: {
+  233 |     marginBottom: theme.spacing.md,
+  234 |   },
+ ERROR  [Error: TransformError SyntaxError: /Users/abhishekgupta/code/personal/allone/app/src/components/passwords/PasswordCard.js: Identifier 'styles' has already been declared. (231:6)
+
+[0m [90m 229 |[39m [33mPasswordCard[39m[33m.[39mdisplayName [33m=[39m [32m'PasswordCard'[39m[33m;[39m
+ [90m 230 |[39m
+[31m[1m>[22m[39m[90m 231 |[39m [36mconst[39m styles [33m=[39m [33mStyleSheet[39m[33m.[39mcreate({
+ [90m     |[39m       [31m[1m^[22m[39m
+ [90m 232 |[39m   container[33m:[39m {
+ [90m 233 |[39m     marginBottom[33m:[39m theme[33m.[39mspacing[33m.[39mmd[33m,[39m
+ [90m 234 |[39m   }[33m,[39m[0m]
+error: SyntaxError: /Users/abhishekgupta/code/personal/allone/app/src/screens/PasswordsScreen.js: Identifier 'styles' has already been declared. (501:6)
+
+  499 | }
+  500 |
+> 501 | const styles = StyleSheet.create({
+      |       ^
+  502 |   container: {
+  503 |     flex: 1,
+  504 |   },
+ ERROR  [Error: TransformError SyntaxError: /Users/abhishekgupta/code/personal/allone/app/src/screens/PasswordsScreen.js: Identifier 'styles' has already been declared. (501:6)
+
+[0m [90m 499 |[39m }
+ [90m 500 |[39m
+[31m[1m>[22m[39m[90m 501 |[39m [36mconst[39m styles [33m=[39m [33mStyleSheet[39m[33m.[39mcreate({
+ [90m     |[39m       [31m[1m^[22m[39m
+ [90m 502 |[39m   container[33m:[39m {
+ [90m 503 |[39m     flex[33m:[39m [35m1[39m[33m,[39m
+ [90m 504 |[39m   }[33m,[39m[0m]
