@@ -8,7 +8,11 @@ import { Plus, Users, Building, Home, UserPlus, X, Settings as SettingsIcon } fr
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
+  AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel,
+} from '../components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import UserSearch from '../components/UserSearch';
@@ -32,6 +36,8 @@ export default function Spaces() {
     name: '',
     type: 'personal'
   });
+  const [pendingMemberToAdd, setPendingMemberToAdd] = useState(null);
+  const [isConfirmAddOpen, setIsConfirmAddOpen] = useState(false);
 
   const loadSpaces = useCallback(async () => {
     if (!currentUser) {
@@ -51,7 +57,6 @@ export default function Spaces() {
       setSpaces(response.data);
     } catch (error) {
       console.error('Failed to load spaces:', error);
-      // Don't redirect on error, just show error message
       if (error.response?.status === 401) {
         toast.error('Authentication expired. Please refresh the page.');
       } else {
@@ -63,7 +68,6 @@ export default function Spaces() {
   }, [currentUser, getAuthHeaders]);
 
   useEffect(() => {
-    // Wait for auth to be ready before loading spaces
     if (!authLoading && currentUser) {
       loadSpaces();
     } else if (!authLoading && !currentUser) {
@@ -72,6 +76,15 @@ export default function Spaces() {
     }
   }, [authLoading, currentUser, loadSpaces]);
 
+  // Sync selectedSpace from the latest spaces state so excludeUserIds stays fresh
+  useEffect(() => {
+    if (isManageDialogOpen && selectedSpace) {
+      const freshSpace = spaces.find(s => s.spaceId === selectedSpace.spaceId);
+      if (freshSpace) setSelectedSpace(freshSpace);
+    }
+    // selectedSpace intentionally omitted to avoid infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spaces, isManageDialogOpen]);
 
   const handleAddSpace = async () => {
     if (!formData.name) {
@@ -138,18 +151,24 @@ export default function Spaces() {
     }
   };
 
-  const handleAddMember = async (user) => {
-    if (!selectedSpace) return;
-    
+  const handleUserSelected = (user) => {
+    setPendingMemberToAdd(user);
+    setIsConfirmAddOpen(true);
+  };
+
+  const handleConfirmAddMember = async () => {
+    if (!selectedSpace || !pendingMemberToAdd) return;
+    setIsConfirmAddOpen(false);
+
     try {
       const headers = await getAuthHeaders();
       await axios.post(
         `${API}/spaces/${selectedSpace.spaceId}/members`,
-        { userId: user.userId },
+        { userId: pendingMemberToAdd.userId },
         { headers }
       );
-      
-      toast.success(`${user.displayName || user.email} added to space`);
+
+      toast.success(`${pendingMemberToAdd.displayName || pendingMemberToAdd.email} added to space`);
       await loadSpaceMembers(selectedSpace.spaceId);
       await loadSpaces();
       // Refresh notifications after adding member
@@ -158,6 +177,8 @@ export default function Spaces() {
       console.error('Failed to add member:', error);
       const errorMessage = error.response?.data?.detail || error.message || 'Failed to add member';
       toast.error(errorMessage);
+    } finally {
+      setPendingMemberToAdd(null);
     }
   };
 
@@ -361,7 +382,7 @@ export default function Spaces() {
               <div>
                 <Label>Add Member</Label>
                 <UserSearch
-                  onSelectUser={handleAddMember}
+                  onSelectUser={handleUserSelected}
                   excludeUserIds={excludeUserIds}
                 />
               </div>
@@ -410,6 +431,37 @@ export default function Spaces() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Confirm Add Member Dialog */}
+        <AlertDialog
+          open={isConfirmAddOpen}
+          onOpenChange={(open) => { if (!open) setPendingMemberToAdd(null); setIsConfirmAddOpen(open); }}
+        >
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Add Member</AlertDialogTitle>
+              <AlertDialogDescription>
+                Adding{' '}
+                <span className="font-semibold text-gray-900">
+                  {pendingMemberToAdd?.displayName || pendingMemberToAdd?.email}
+                </span>{' '}
+                to this space will share all passwords in{' '}
+                <span className="font-semibold text-gray-900">
+                  {selectedSpace?.name}
+                </span>{' '}
+                with them. Do you want to continue?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setPendingMemberToAdd(null)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmAddMember}>
+                Add Member
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

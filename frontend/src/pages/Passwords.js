@@ -727,6 +727,7 @@ export default function Passwords() {
               password={pwd}
               index={index}
               encryptionKey={encryptionKey}
+              userId={currentUser.userId}
               onDelete={handleDeletePassword}
               onEdit={handleEditPassword}
               onCopy={handleCopyPassword}
@@ -767,6 +768,8 @@ function PasswordCard({ password, index, encryptionKey, onDelete, onEdit, onCopy
       setDecryptedPassword(decrypted);
     } catch (error) {
       console.error('Failed to decrypt:', error);
+      setDecryptedPassword('');
+      toast.error('Failed to decrypt password. It may have been encrypted on a different device.');
     }
   };
 

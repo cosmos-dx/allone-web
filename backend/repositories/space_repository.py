@@ -156,11 +156,16 @@ class SpaceRepository:
                 doc_ref.update({'members': members})
             
             cache_service.delete(f"space_{space_id}")
+            owner_id = existing.get('ownerId')
+            if owner_id:
+                cache_service.invalidate_pattern(f"spaces_user_{owner_id}")
+            for admin_id in existing.get('admins', []):
+                cache_service.invalidate_pattern(f"spaces_user_{admin_id}")
             cache_service.invalidate_pattern(f"spaces_user_{member_id}")
             cache_service.invalidate_pattern(f"spaces_member_{member_id}")
             cache_service.invalidate_pattern(f"passwords_{member_id}_")
             cache_service.invalidate_pattern(f"totps_{member_id}_")
-            
+
             updated_doc = doc_ref.get()
             updated_data = updated_doc.to_dict()
             updated_data['spaceId'] = space_id
@@ -185,11 +190,16 @@ class SpaceRepository:
                 doc_ref.update({'members': members})
             
             cache_service.delete(f"space_{space_id}")
+            owner_id = existing.get('ownerId')
+            if owner_id:
+                cache_service.invalidate_pattern(f"spaces_user_{owner_id}")
+            for admin_id in existing.get('admins', []):
+                cache_service.invalidate_pattern(f"spaces_user_{admin_id}")
             cache_service.invalidate_pattern(f"spaces_user_{member_id}")
             cache_service.invalidate_pattern(f"spaces_member_{member_id}")
             cache_service.invalidate_pattern(f"passwords_{member_id}_")
             cache_service.invalidate_pattern(f"totps_{member_id}_")
-            
+
             updated_doc = doc_ref.get()
             updated_data = updated_doc.to_dict()
             updated_data['spaceId'] = space_id
